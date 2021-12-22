@@ -91,13 +91,12 @@ def get_z(la, lo):
     print('lo=', lo, 'la=', la, 'lo2=', lo2, 'la2=', la2)
 
 
-def transform_coord(transformer, beg_loop_x, end_loop_x, step, beg_loop_y, end_loop_y,
+def transform_coord(transformer, beg_loop_x, end_loop_x, step_x, beg_loop_y, end_loop_y, step_y,
                     n_cols, xll_corner, yll_corner, cell_size, nan):
-    for x in range(beg_loop_x, end_loop_x, step):
+    for x in range(beg_loop_x, end_loop_x, step_x):
         print(x)
         data = ""
-        # for y in range(startLoopY,endLoopY, step):
-        for y in range(beg_loop_y, end_loop_y, -step):
+        for y in range(beg_loop_y, end_loop_y, step_y):
             laVal, loVal = transformer.transform(x, y)
             la_local = int(n_cols - 1 - round((laVal - yll_corner) / cell_size))
             lo_local = int(round((loVal - xll_corner) / cell_size))
@@ -108,5 +107,5 @@ def transform_coord(transformer, beg_loop_x, end_loop_x, step, beg_loop_y, end_l
         my_file.write(data)
 
 
-transform_coord(Transformer.from_crs(epsg_local, epsg_global), beg_x, end_x, step, beg_y, end_y,
+transform_coord(Transformer.from_crs(epsg_local, epsg_global), beg_x, end_x, step, beg_y, end_y, -step,
                 n_cols, xll_corner, yll_corner, cell_size, NAN)
