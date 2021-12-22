@@ -1,110 +1,112 @@
 from pyproj import Proj, transform, Transformer
 import numpy as np
 
-startX = 370000
-endX = 410000
-startY = 2030000
-endY = 1990000
+beg_x = 370000
+end_x = 410000
+beg_y = 2030000
+end_y = 1990000
 step = 100
 NAN = -9999
 project_name = 'oman'
 epsg_local = 3440
-#https://epsg.io/
-#http://srtm.csi.cgiar.org/srtmdata/
-input = '../input/'+project_name+'/srtm_47_08.asc'
-input2 = '../input/'+project_name+'/srtm_47_09.asc'
-input3 = '../input/'+project_name+'/srtm_48_08.asc'
-input4 = '../input/'+project_name+'/srtm_48_09.asc'
+# https://epsg.io/
+# http://srtm.csi.cgiar.org/srtmdata/
+input_1 = '../input/' + project_name + '/srtm_47_08.asc'
+input_2 = '../input/' + project_name + '/srtm_47_09.asc'
+input_3 = '../input/' + project_name + '/srtm_48_08.asc'
+input_4 = '../input/' + project_name + '/srtm_48_09.asc'
 
-xllcorner = 50
-yllcorner= 20
-cellsize=0.00083333333333333
-ncols = 6000
-with open(input, "r") as ins:
+xll_corner = 50
+yll_corner = 20
+cell_size = 0.00083333333333333
+n_cols = 6000
+with open(input_1, "r") as ins:
     i = 0
     for line in ins:
         if i >= 6:
-            break;
+            break
         print(line)
         param = line.split()
         if param[0] == 'xllcorner':
-            xllcorner = float(param[1])
+            xll_corner = float(param[1])
         if param[0] == 'yllcorner':
-            yllcorner = float(param[1])
+            yll_corner = float(param[1])
         if param[0] == 'cellsize':
-            cellsize = float(param[1])
+            cell_size = float(param[1])
         if param[0] == 'ncols':
-            ncols = float(param[1])
+            n_cols = float(param[1])
         i += 1
-# srtm_x = xllcorner * 0.2 + 37
-# srtm_y = yllcorner * (-0.2) + 12
+# srtm_x = xll_corner * 0.2 + 37
+# srtm_y = yll_corner * (-0.2) + 12
 
 
-fileName = '../output/'+project_name
+fileName = '../output/' + project_name
 fileName += str(step) + 'x' + str(step) + '.topo'
 
 epsg_global = 4326
 
-transformerBack = Transformer.from_crs(epsg_global,epsg_local)
-x1,y1 = transformerBack.transform(yllcorner,xllcorner)
-x2,y2 = transformerBack.transform(yllcorner+cellsize*ncols,xllcorner+cellsize*ncols)
+transformerBack = Transformer.from_crs(epsg_global, epsg_local)
+x1, y1 = transformerBack.transform(yll_corner, xll_corner)
+x2, y2 = transformerBack.transform(yll_corner + cell_size * n_cols, xll_corner + cell_size * n_cols)
 startXData = min(x1, x2)
 endXData = max(x1, x2)
-startYData = min(y1,y2)
-endYData = max(y1,y2)
-print(xllcorner,yllcorner)
-print(xllcorner+cellsize*ncols,yllcorner+cellsize*ncols)
+startYData = min(y1, y2)
+endYData = max(y1, y2)
+print(xll_corner, yll_corner)
+print(xll_corner + cell_size * n_cols, yll_corner + cell_size * n_cols)
 print('')
-print(x1,y1)
-print(x2,y2)
+print(x1, y1)
+print(x2, y2)
 
-print(startX,startY)
-print(endX,endY)
+print(beg_x, beg_y)
+print(end_x, end_y)
+
+ascii_grid = np.loadtxt(input_1, skiprows=6)
+ascii_grid2 = np.loadtxt(input_2, skiprows=6)
+ascii_grid3 = np.loadtxt(input_3, skiprows=6)
+ascii_grid4 = np.loadtxt(input_4, skiprows=6)
+my_file = open(fileName, 'w')
 
 
-
-
-ascii_grid = np.loadtxt(input, skiprows=6)
-ascii_grid2 = np.loadtxt(input2, skiprows=6)
-ascii_grid3 = np.loadtxt(input3, skiprows=6)
-ascii_grid4 = np.loadtxt(input4, skiprows=6)
-myfile = open(fileName, 'w')
-
-startLoopX = startX
-endLoopX = endX
-startLoopY = startY
-endLoopY = endY
-print (ascii_grid[0][0])
-print (ascii_grid[5999][0])
-print (ascii_grid[5999][5999])
-print (ascii_grid[0][5999])
+print(ascii_grid[0][0])
+print(ascii_grid[5999][0])
+print(ascii_grid[5999][5999])
+print(ascii_grid[0][5999])
 print('Loop')
-print(startLoopX, endLoopX)
-print(startLoopY, endLoopY)
+print(beg_x, end_x)
+print(beg_y, end_y)
 
-def GetZ(la, lo):
-    la2 = int(la - ncols)
-    lo2 = int(lo - ncols)
-    if(la >= ncols and lo >= ncols):
+
+def get_z(la, lo):
+    la2 = int(la - n_cols)
+    lo2 = int(lo - n_cols)
+    if la >= n_cols and lo >= n_cols:
         return ascii_grid4[la2][lo2]
-    if(la >= ncols and lo >= 0 and lo < ncols):
+    if la >= n_cols > lo >= 0:
         return ascii_grid3[la2][lo]
-    if(la >= 0 and la < ncols and lo >= 0 and lo < ncols):
+    if 0 <= la < n_cols and 0 <= lo < n_cols:
         return ascii_grid[la][lo]
-    if(la >= 0 and la < ncols and lo >= ncols):
+    if 0 <= la < n_cols <= lo:
         return ascii_grid2[la][lo2]
-    print('lo=',lo, 'la=',la, 'lo2=',lo2,'la2=',la2)
-transformer = Transformer.from_crs(epsg_local, epsg_global)
-for x in range(startLoopX, endLoopX,step):
-    print(x)
-    data = ""
-    #for y in range(startLoopY,endLoopY, step):
-    for y in range(startLoopY, endLoopY, -step):
-        laVal, loVal = transformer.transform(x, y)
-        la = int(ncols - 1 - round((laVal - yllcorner) / cellsize));
-        lo = int(round((loVal - xllcorner) / cellsize));
-        z = GetZ(la,lo)
-        if z == NAN:
-            z = 0
-        data += str(x) + "\t" + str(y) + "\t"+ str(z)+'\n'
-    myfile.write(data)
+    print('lo=', lo, 'la=', la, 'lo2=', lo2, 'la2=', la2)
+
+
+def transform_coord(transformer, beg_loop_x, end_loop_x, step, beg_loop_y, end_loop_y,
+                    n_cols, xll_corner, yll_corner, cell_size, nan):
+    for x in range(beg_loop_x, end_loop_x, step):
+        print(x)
+        data = ""
+        # for y in range(startLoopY,endLoopY, step):
+        for y in range(beg_loop_y, end_loop_y, -step):
+            laVal, loVal = transformer.transform(x, y)
+            la_local = int(n_cols - 1 - round((laVal - yll_corner) / cell_size))
+            lo_local = int(round((loVal - xll_corner) / cell_size))
+            z = get_z(la_local, lo_local)
+            if z == nan:
+                z = 0
+            data += str(x) + "\t" + str(y) + "\t" + str(z) + '\n'
+        my_file.write(data)
+
+
+transform_coord(Transformer.from_crs(epsg_local, epsg_global), beg_x, end_x, step, beg_y, end_y,
+                n_cols, xll_corner, yll_corner, cell_size, NAN)
