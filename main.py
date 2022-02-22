@@ -5,10 +5,13 @@ beg_x = 370000
 end_x = 410000
 beg_y = 2030000
 end_y = 1990000
+
 step = 100
 NAN = -9999
+
 project_name = 'oman'
 epsg_local = 3440
+
 # https://epsg.io/
 # http://srtm.csi.cgiar.org/srtmdata/
 input_1 = '../input/' + project_name + '/srtm_47_08.asc'
@@ -92,14 +95,14 @@ def get_z(la, lo):
 
 
 def transform_coord(transformer, beg_loop_x, end_loop_x, step_x, beg_loop_y, end_loop_y, step_y,
-                    n_cols, xll_corner, yll_corner, cell_size, nan):
+                    n_columns, xll_corner_value, yll_corner_value, cell_size_value, nan):
     for x in range(beg_loop_x, end_loop_x, step_x):
         print(x)
         data = ""
         for y in range(beg_loop_y, end_loop_y, step_y):
-            laVal, loVal = transformer.transform(x, y)
-            la_local = int(n_cols - 1 - round((laVal - yll_corner) / cell_size))
-            lo_local = int(round((loVal - xll_corner) / cell_size))
+            la_val, lo_val = transformer.transform(x, y)
+            la_local = int(n_columns - 1 - round((la_val - yll_corner_value) / cell_size_value))
+            lo_local = int(round((lo_val - xll_corner_value) / cell_size_value))
             z = get_z(la_local, lo_local)
             if z == nan:
                 z = 0
